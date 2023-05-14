@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 
-#define FILE_PATH "music/A Cruel Angel's Thesis (Director's Edit Version).wav"
+// #define FILE_PATH "music/A Cruel Angel's Thesis (Director's Edit Version).wav"
+#define FILE_PATH "Test_Songs/LippsInc-FunkyTownlongVersion.wav"
 
 typedef struct
 {
@@ -56,8 +57,8 @@ int main(int argc, char** argv)
 	SDL_QueueAudio(device, wav_buffer, wav_len);
 	SDL_PauseAudioDevice(device, 0);
 
-	// it only plays for 5 seconds and then it stops
-	SDL_Delay(5000);
+	// it only plays for 6.07 minutes and then it stops
+	SDL_Delay(367000);
 	SDL_CloseAudioDevice(device);
 	SDL_FreeWAV(wav_buffer);
 	SDL_Quit();
