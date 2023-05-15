@@ -22,3 +22,6 @@ fixed: fixed.c
 
 clean:
 	rm -f start startGtkApp container box fixed
+
+Colors: Colors.c
+	$(CC) $(CFLAGS) -o Colors Colors.c $(LIBS)

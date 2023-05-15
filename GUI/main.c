@@ -1,42 +1,56 @@
 #include <gtk/gtk.h>
 
-int main(int argc, char **argv)
+void myCSS(void);
+
+static void activate(GtkApplication *app, gpointer user_data)
 {
-    gtk_init(&argc, &argv);
-
-    // gtk code comes here
-
+    // gtk code
     GtkWidget *window;
-    GtkWidget *fixed;
 
-    GtkWidget *button1;
-    GtkWidget *button2;
+    window = gtk_application_window_new(app);
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-    gtk_window_set_title(GTK_WINDOW(window), "Spotify");
     gtk_window_set_default_size(GTK_WINDOW(window), 1200, 800);
+
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-    gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
 
-    fixed = gtk_fixed_new();
-
-    button1 = gtk_button_new_with_label("button1");
-    button2 = gtk_button_new_with_label("button2");
-
-    gtk_widget_set_size_request(GTK_WIDGET(button1), 80, 40);
-    gtk_widget_set_size_request(GTK_WIDGET(button2), 80, 40);
-
-    gtk_fixed_put(GTK_FIXED(fixed), button1, 5, 1);
-    gtk_fixed_put(GTK_FIXED(fixed), button2, 5, 50);
-
-    gtk_container_add(GTK_CONTAINER(window), fixed);
-
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    gtk_widget_set_name(GTK_WIDGET(window), "myWindow");
 
     gtk_widget_show_all(window);
 
-    gtk_main ();
+    gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
+}
 
-    return 0;
+int main(int argc, char **argv)
+{
+    GtkApplication *app;
+    int ret;
+    gtk_init(&argc, &argv);
+    myCSS();
+    
+    app = gtk_application_new("in.music", G_APPLICATION_FLAGS_NONE);
+
+    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+
+    ret = g_application_run(G_APPLICATION(app), argc, argv);
+
+    g_object_unref(app);
+
+    return ret;
+}
+
+void myCSS(void){
+    GtkCssProvider *provider;
+    GdkDisplay *display;
+    GdkScreen *screen;
+
+    provider = gtk_css_provider_new ();
+    display = gdk_display_get_default ();
+    screen = gdk_display_get_default_screen (display);
+    gtk_style_context_add_provider_for_screen (screen, GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    const gchar *myCssFile = "data.css";
+    GError *error = 0;
+
+    gtk_css_provider_load_from_file(provider, g_file_new_for_path(myCssFile), &error);
+    g_object_unref (provider);
 }
