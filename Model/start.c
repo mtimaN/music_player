@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
+    printf("%d\n", 10);
     gtk_widget_show_all(window);
 
     gtk_main ();

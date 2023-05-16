@@ -1,7 +1,12 @@
-GtkWindow {
-    background-color: black;
-}
 
 #myWindow {
-    background-color: black;
+    background-color: rgb(9, 7, 7);
 }
+
+#Play-Pause{
+    background-color: rgb(207, 202, 202);
+}
+
+#Play-Pause:hover{
+    background-color: rgb(255, 255, 255);
+ }
