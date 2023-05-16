@@ -9,4 +9,4 @@ main: main.c
 	$(CC) $(CFLAGS) -o main main.c $(LIBS)
 
 clean:
-	rm -f start startGtkApp container box fixed
+	rm -f main
