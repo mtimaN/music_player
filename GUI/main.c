@@ -1,16 +1,50 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+#define LENGHT 120000.0
+
+typedef struct progress_shower progress_shower;
+struct progress_shower {
+    GtkWidget *prog_bar;
+    GtkWidget *button;
+};
 
 void myCSS(void);
 
+static gboolean inc_progress(gpointer data)
+{   
+    progress_shower *p = data;
+    GtkWidget *prog_bar = GTK_WIDGET(p->prog_bar);
+
+    gdouble prog = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(prog_bar));
+    const char *curr_label = gtk_button_get_label(GTK_BUTTON(p->button));
+    if (!strcmp(curr_label, "Play"))
+        return FALSE;
+
+    if (prog >= 1.0)
+        prog = 0.0;
+    else
+        prog += (1000.0/LENGHT);
+
+    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), prog);
+}
+
 static void change_main_button_label(GtkWidget *button, gpointer data)
-{
+{   
+    GtkWidget *prog_bar = data;
+    progress_shower *p = malloc(sizeof(progress_shower));
+    p->prog_bar = prog_bar;
+    p->button = button;
     const char *curr_label = gtk_button_get_label(GTK_BUTTON(button));
     if (!strcmp(curr_label, "Play")) {
         gtk_button_set_label(GTK_BUTTON(button), "Pause");
+        g_print("Playing...\n");
+        g_timeout_add(1000, inc_progress, p);
     } else {
         gtk_button_set_label(GTK_BUTTON(button), "Play");
+        g_print("Paused\n");
     }
 }
 
@@ -34,8 +68,6 @@ void myButton(GtkWidget **button)
     *button = gtk_button_new_with_label("Play");
 
     gtk_widget_set_name(GTK_WIDGET(*button), "Play-Pause");
-
-    g_signal_connect(*button, "clicked", G_CALLBACK(change_main_button_label), NULL);
 
     gtk_widget_set_size_request(GTK_WIDGET(*button), 65, 30);
 }
@@ -62,6 +94,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 {
     // gtk code
     GtkWidget *window, *button, *fixed, *top_left_box, *left_box, *main_grid;
+    GtkWidget *prog_bar;
     const char *curr_label;
 
     window = gtk_application_window_new(app);
@@ -76,11 +109,23 @@ static void activate(GtkApplication *app, gpointer user_data)
     
     mylayout(&fixed, &top_left_box, &left_box, &main_grid);
 
-    curr_label = gtk_button_get_label(GTK_BUTTON(button));
-    printf("%s\n", curr_label);
-    if (!strcmp(curr_label, "Pause")) {
-        printf("Playing...\n");
-    }
+    prog_bar = gtk_progress_bar_new();
+    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), 0.0);
+    gtk_fixed_put(GTK_FIXED(fixed), prog_bar, 300, 750);
+    gtk_widget_set_size_request(GTK_WIDGET(prog_bar), 600, 4);
+    gtk_widget_set_name(GTK_WIDGET(prog_bar), "progress_bar");
+
+    g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), prog_bar);
+    
+
+    // const char *curr_label = gtk_button_get_label(GTK_BUTTON(button));
+    // if (!strcmp(curr_label, "Play")) {
+    //     gtk_button_set_label(GTK_BUTTON(button), "Pause");
+        
+    // } else {
+    //     gtk_button_set_label(GTK_BUTTON(button), "Play");
+    //     g_print("Paused\n");
+    // }
 
     myWindow(&window);
 }

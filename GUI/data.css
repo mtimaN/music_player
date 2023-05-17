@@ -25,3 +25,13 @@
     background-color: rgb(21, 21, 21);
     border-radius: 15px;
 }
+
+#progress_bar progress{
+    background-color: rgb(255, 255, 255);
+}
+
+#progress_bar {
+    background-color: rgb(94, 91, 91);
+    border-radius: 2px;
+}
+
