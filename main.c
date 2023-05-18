@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // #define FILE_PATH "music/A Cruel Angel's Thesis (Director's Edit Version).wav"
 #define FILE_PATH "Test_Songs/LippsInc-FunkyTownlongVersion.wav"
 
@@ -33,6 +34,8 @@ int main(int argc, char** argv)
 {
 	SDL_Init(SDL_INIT_AUDIO);
 =======
+=======
+>>>>>>> ace038a (Minimal Video Interface, just for testing)
 #define FILE_PATH "../songs/【東方】Bad Apple!! ＰＶ【影絵】.wav"
 
 int main(int argc, char** argv)
@@ -62,11 +65,15 @@ int main(int argc, char** argv)
 	SDL_SetRenderDrawColor(renderer, 128, 128, 0, 128);
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
+<<<<<<< HEAD
+>>>>>>> ace038a (Minimal Video Interface, just for testing)
+=======
 >>>>>>> ace038a (Minimal Video Interface, just for testing)
 
 	SDL_AudioSpec wav_spec;
 	Uint8 *wav_buffer;
 	Uint32 wav_len;
+<<<<<<< HEAD
 <<<<<<< HEAD
 	if(SDL_LoadWAV(FILE_PATH, &wav_spec, &wav_buffer, &wav_len) == NULL)
 	{
@@ -93,6 +100,8 @@ int main(int argc, char** argv)
 	// it only plays for 6.07 minutes and then it stops
 	SDL_Delay(367000);
 =======
+=======
+>>>>>>> ace038a (Minimal Video Interface, just for testing)
 	if (SDL_LoadWAV(FILE_PATH, &wav_spec, &wav_buffer, &wav_len) == NULL)
 	{
         fprintf(stderr, "Error: %s\n", SDL_GetError());
@@ -114,13 +123,20 @@ int main(int argc, char** argv)
 	// it only plays for 50 seconds and then it stops
 	SDL_Delay(50000);
 
+<<<<<<< HEAD
+>>>>>>> ace038a (Minimal Video Interface, just for testing)
+=======
 >>>>>>> ace038a (Minimal Video Interface, just for testing)
 	SDL_CloseAudioDevice(device);
 	SDL_FreeWAV(wav_buffer);
 	SDL_Quit();
 	return 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> ace038a (Minimal Video Interface, just for testing)
 =======
 }
 >>>>>>> ace038a (Minimal Video Interface, just for testing)
