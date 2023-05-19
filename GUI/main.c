@@ -3,12 +3,12 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define LENGHT 120000.0
+#define LENGHT 60000.0
 
 typedef struct progress_shower progress_shower;
 struct progress_shower {
     GtkWidget *prog_bar;
-    GtkWidget *button;
+    int pause;
 };
 
 void myCSS(void);
@@ -17,11 +17,12 @@ static gboolean inc_progress(gpointer data)
 {   
     progress_shower *p = data;
     GtkWidget *prog_bar = GTK_WIDGET(p->prog_bar);
-
+    // int i = 0;
     gdouble prog = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(prog_bar));
-    const char *curr_label = gtk_button_get_label(GTK_BUTTON(p->button));
-    if (!strcmp(curr_label, "Play"))
+    if (p->pause) {
+        p->pause = -1;
         return FALSE;
+    }
 
     if (prog >= 1.0)
         prog = 0.0;
@@ -29,23 +30,28 @@ static gboolean inc_progress(gpointer data)
         prog += (1000.0/LENGHT);
 
     gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), prog);
+    printf("11\n");
 }
 
 static void change_main_button_label(GtkWidget *button, gpointer data)
 {   
-    GtkWidget *prog_bar = data;
-    progress_shower *p = malloc(sizeof(progress_shower));
-    p->prog_bar = prog_bar;
-    p->button = button;
+    progress_shower *p = data;
+    
     const char *curr_label = gtk_button_get_label(GTK_BUTTON(button));
-    if (!strcmp(curr_label, "Play")) {
+
+    if (p->pause) {
         gtk_button_set_label(GTK_BUTTON(button), "Pause");
         g_print("Playing...\n");
-        g_timeout_add(1000, inc_progress, p);
+        if (p->pause == -1)
+            g_timeout_add(1000, inc_progress, p);
+
+        p->pause = 0;
     } else {
         gtk_button_set_label(GTK_BUTTON(button), "Play");
         g_print("Paused\n");
+        p->pause = 1;
     }
+        // g_timeout_add(1000, inc_progress, p);
 }
 
 void myWindow(GtkWidget **window)
@@ -97,6 +103,8 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *prog_bar;
     const char *curr_label;
 
+    progress_shower *p = malloc(sizeof(progress_shower));
+
     window = gtk_application_window_new(app);
     // main container
     fixed = gtk_fixed_new();
@@ -110,13 +118,16 @@ static void activate(GtkApplication *app, gpointer user_data)
     mylayout(&fixed, &top_left_box, &left_box, &main_grid);
 
     prog_bar = gtk_progress_bar_new();
+
+    p->prog_bar = prog_bar;
+    p->pause = -1;
+
     gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), 0.0);
     gtk_fixed_put(GTK_FIXED(fixed), prog_bar, 300, 750);
     gtk_widget_set_size_request(GTK_WIDGET(prog_bar), 600, 4);
     gtk_widget_set_name(GTK_WIDGET(prog_bar), "progress_bar");
 
-    g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), prog_bar);
-    
+    g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), p);
 
     // const char *curr_label = gtk_button_get_label(GTK_BUTTON(button));
     // if (!strcmp(curr_label, "Play")) {
@@ -132,6 +143,8 @@ static void activate(GtkApplication *app, gpointer user_data)
 
 int main(int argc, char **argv)
 {
+    GDir *test_songs = g_dir_open("../Test_Songs", 0, NULL);
+
     GtkApplication *app;
     int ret;
     gtk_init(&argc, &argv);
@@ -139,11 +152,15 @@ int main(int argc, char **argv)
     
     app = gtk_application_new("in.music", G_APPLICATION_FLAGS_NONE);
 
+    // printf("%s\n", g_dir_read_name(test_songs));
+
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     ret = g_application_run(G_APPLICATION(app), argc, argv);
 
+    printf("%s\n", g_dir_read_name(test_songs));
     g_object_unref(app);
-
+    
+    // printf("%s\n", g_dir_read_name(test_songs));
     // gtk_main();
     return ret;
 }
