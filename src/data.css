@@ -1,0 +1,64 @@
+
+#myWindow {
+    background-color: rgb(9, 7, 7);
+}
+
+#Play-Pause{
+    background-color: rgb(207, 202, 202);
+    border-style: none;
+}
+
+#Play-Pause:hover{
+    background-color: rgb(255, 255, 255);
+    border-style: none;
+ }
+
+#main_grid{
+    background-color: rgb(21, 21, 21);
+    border-radius: 15px;
+    border-style: none;
+}
+
+#top_left_box{
+    background-color: rgb(21, 21, 21);
+    border-radius: 15px;
+    border-style: none;
+}
+
+#left_box{
+    background-color: rgb(21, 21, 21);
+    border-radius: 15px;
+    border-style: none;
+}
+
+#progress_bar progress{
+    background-color: rgb(255, 255, 255);
+    border-radius: 15px;
+}
+
+#progress_bar {
+    background-color: rgb(94, 91, 91);
+    /* border-radius: 2px; */
+    border-radius: 15px;
+}
+
+#playlists_list{
+    background-color: transparent;
+}
+
+#Play-Pause{
+    background-color: rgb(207, 202, 202);
+    border-style: none;
+}
+
+#playlist {
+    background-color: transparent;
+    color: rgb(255, 255, 255);
+    border-radius: 15px;
+    border-style: none;
+}
+
+#playlist:hover{
+    background-color: rgb(63, 62, 62);
+}
+
