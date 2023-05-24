@@ -89,11 +89,13 @@ void myButton(GtkWidget **button)
 	gtk_widget_set_name(GTK_WIDGET(*button), "Play-Pause");
 
 	gtk_widget_set_size_request(GTK_WIDGET(*button), 65, 30);
+
+	gtk_button_set_relief(GTK_BUTTON(*button), GTK_RELIEF_NONE);
 }
 
 void mylayout(GtkWidget **fixed, GtkWidget **top_left_box, GtkWidget **left_box, GtkWidget **main_grid) {
 	*top_left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	*left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	*left_box = gtk_scrolled_window_new(NULL, NULL);
 	*main_grid = gtk_grid_new();
 	// main list
 	gtk_widget_set_size_request(GTK_WIDGET(*main_grid), 985, 650);
@@ -109,11 +111,19 @@ void mylayout(GtkWidget **fixed, GtkWidget **top_left_box, GtkWidget **left_box,
 	gtk_widget_set_name(GTK_WIDGET(*left_box), "left_box");
 }
 
+void myProgressBar(GtkWidget **prog_bar, GtkWidget **fixed)
+{
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(*prog_bar), 0.0);
+	gtk_fixed_put(GTK_FIXED(*fixed), *prog_bar, 300, 750);
+	gtk_widget_set_size_request(GTK_WIDGET(*prog_bar), 600, 4);
+	gtk_widget_set_name(GTK_WIDGET(*prog_bar), "progress_bar");
+}
+
 static void activate(GtkApplication *app, gpointer user_data)
 {
 	// gtk code
 	GtkWidget *window, *button, *fixed, *top_left_box, *left_box, *main_grid;
-	GtkWidget *prog_bar;
+	GtkWidget *prog_bar, *playlists_list, *playlist1, *playlist2, *playlist3, *playlist4;
 	const char *curr_label;
 
 	progress_shower *p = malloc(sizeof(progress_shower));
@@ -131,14 +141,64 @@ static void activate(GtkApplication *app, gpointer user_data)
 	mylayout(&fixed, &top_left_box, &left_box, &main_grid);
 
 	prog_bar = gtk_progress_bar_new();
-
 	p->prog_bar = prog_bar;
 	p->pause = -1;
+	myProgressBar(&prog_bar, &fixed);
 
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), 0.0);
-	gtk_fixed_put(GTK_FIXED(fixed), prog_bar, 300, 750);
-	gtk_widget_set_size_request(GTK_WIDGET(prog_bar), 600, 4);
-	gtk_widget_set_name(GTK_WIDGET(prog_bar), "progress_bar");
+	playlists_list = gtk_list_box_new();
+	gtk_widget_set_name(GTK_WIDGET(playlists_list), "playlists_list");
+	// gtk_widget_set_size_request(GTK_WIDGET(playlists_list), 200, 300);
+
+	// gtk_list_box_set_selection_mode(GTK_LIST_BOX(playlists_list), GTK_SELECTION_NONE);
+
+	gtk_container_add(GTK_CONTAINER(left_box), playlists_list);
+
+	playlist2 = gtk_button_new_with_label("2");
+	gtk_widget_set_size_request(GTK_WIDGET(playlist2), 150, 200);
+	gtk_list_box_insert(GTK_LIST_BOX(playlists_list), playlist2, 0);
+	gtk_widget_set_name(GTK_WIDGET(playlist2), "playlist");
+	gtk_button_set_relief(GTK_BUTTON(playlist2), GTK_RELIEF_NONE);
+
+	playlist3 = gtk_button_new_with_label("3");
+	gtk_widget_set_size_request(GTK_WIDGET(playlist3), 150, 200);
+	gtk_list_box_insert(GTK_LIST_BOX(playlists_list), playlist3, 0);
+	gtk_widget_set_name(GTK_WIDGET(playlist3), "playlist");
+	gtk_button_set_relief(GTK_BUTTON(playlist3), GTK_RELIEF_NONE);
+
+	playlist4 = gtk_button_new_with_label("4");
+	gtk_widget_set_size_request(GTK_WIDGET(playlist4), 150, 200);
+	gtk_list_box_insert(GTK_LIST_BOX(playlists_list), playlist4, 0);
+	gtk_widget_set_name(GTK_WIDGET(playlist4), "playlist");
+	gtk_button_set_relief(GTK_BUTTON(playlist4), GTK_RELIEF_NONE);
+
+	playlist1 = gtk_button_new_with_label("1");
+	gtk_widget_set_size_request(GTK_WIDGET(playlist1), 150, 200);
+	gtk_list_box_insert(GTK_LIST_BOX(playlists_list), playlist1, 0);
+	gtk_widget_set_name(GTK_WIDGET(playlist1), "playlist");
+	gtk_button_set_relief(GTK_BUTTON(playlist1), GTK_RELIEF_NONE);
+
+	
+	// playlists_list = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	// gtk_widget_set_name(GTK_WIDGET(playlists_list), "playlists_list");
+	// gtk_widget_set_size_request(GTK_WIDGET(playlists_list), 200, 100);
+
+	// gtk_container_add(GTK_CONTAINER(left_box), playlists_list);
+
+	// playlist2 = gtk_button_new_with_label("2");
+	// gtk_widget_set_size_request(GTK_WIDGET(playlist2), 200, 50);
+	// gtk_box_pack_start(GTK_BOX(playlists_list), playlist2, FALSE, FALSE, 1);
+
+	// playlist3 = gtk_button_new_with_label("3");
+	// gtk_widget_set_size_request(GTK_WIDGET(playlist3), 200, 50);
+	// gtk_box_pack_start(GTK_BOX(playlists_list), playlist3, FALSE, FALSE, 1);
+
+	// playlist4 = gtk_button_new_with_label("4");
+	// gtk_widget_set_size_request(GTK_WIDGET(playlist4), 200, 50);
+	// gtk_box_pack_start(GTK_BOX(playlists_list), playlist4, FALSE, FALSE, 1);
+
+	// playlist1 = gtk_button_new_with_label("1");
+	// gtk_widget_set_size_request(GTK_WIDGET(playlist1), 200, 50);
+	// gtk_box_pack_start(GTK_BOX(playlists_list), playlist1, FALSE, FALSE, 1);
 
 	g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), p);
 
