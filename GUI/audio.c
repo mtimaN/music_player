@@ -7,9 +7,9 @@ SDL_AudioDeviceID audio_device = 0;
 float volume_slider_value = 1.0f;
 float balance_slider_value = 0.5f;
 
-Uint8 *wavbuf = NULL;
-Uint32 wavlen = 0;
-SDL_AudioSpec wavspec;
+/*Uint8 *wavbuf = NULL;
+Uint32 wavlen = 0;*/
+//SDL_AudioSpec wavspec;
 SDL_AudioStream *stream = NULL;
 
 void panic_and_abort(const char *title, const char *text)
@@ -62,7 +62,7 @@ void SDLCALL feed_audio_device_callback(void *userdata, Uint8 *output_stream, in
     }
 }
 
-void stop_audio(void)
+void stop_audio(Uint8 **wavbuf, Uint32 *wavlen)
 {
     SDL_LockAudioDevice(audio_device);
     if (stream) {
@@ -71,15 +71,15 @@ void stop_audio(void)
     }
     SDL_UnlockAudioDevice(audio_device);
 
-    if (wavbuf) {
-        SDL_FreeWAV(wavbuf);
+    if (*wavbuf) {
+        SDL_FreeWAV(*wavbuf);
     }
 
-    wavbuf = NULL;
-    wavlen = 0;
+    *wavbuf = NULL;
+    *wavlen = 0;
 }
 
-SDL_bool open_new_audio_file(const char *fname)
+SDL_bool open_new_audio_file(const char *fname, Uint8 **wavbuf, Uint32 *wavlen, SDL_AudioSpec *wavspec)
 {
     SDL_AudioStream *tmpstream = stream;
 
@@ -89,21 +89,21 @@ SDL_bool open_new_audio_file(const char *fname)
     SDL_UnlockAudioDevice(audio_device);
 
     SDL_FreeAudioStream(tmpstream);
-    SDL_FreeWAV(wavbuf);
-    wavbuf = NULL;
-    wavlen = 0;
+    SDL_FreeWAV(*wavbuf);
+    *wavbuf = NULL;
+    *wavlen = 0;
 
-    if (SDL_LoadWAV(fname, &wavspec, &wavbuf, &wavlen) == NULL) {
+    if (SDL_LoadWAV(fname, wavspec, wavbuf, wavlen) == NULL) {
         printf("SADFACE\n");
         goto failed;
     }
 
-    tmpstream = SDL_NewAudioStream(wavspec.format, wavspec.channels, wavspec.freq, AUDIO_F32, 2, 48000);
+    tmpstream = SDL_NewAudioStream(wavspec->format, wavspec->channels, wavspec->freq, AUDIO_F32, 2, 48000);
     if (!tmpstream) {
         goto failed;
     }
 
-    if (SDL_AudioStreamPut(tmpstream, wavbuf, wavlen) == -1) {
+    if (SDL_AudioStreamPut(tmpstream, *wavbuf, *wavlen) == -1) {
         goto failed;
     }
 
@@ -119,14 +119,13 @@ SDL_bool open_new_audio_file(const char *fname)
     return SDL_TRUE;
 
 failed:
-    stop_audio();
+    stop_audio(wavbuf, wavlen);
     return SDL_FALSE;
 }
 
-void init_everything()
+void init_everything(Uint8 **wavbuf, Uint32 *wavlen)
 {
     SDL_AudioSpec desired;
-
     if (SDL_Init(SDL_INIT_AUDIO) == -1) {
         panic_and_abort("SDL_Init failed", SDL_GetError());
     }
@@ -145,10 +144,10 @@ void init_everything()
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);  // tell SDL we want this event that is disabled by default.
 
-    open_new_audio_file("../Test_Songs/LippsInc-FunkyTownlongVersion.wav");
+    open_new_audio_file("../Test_Songs/LippsInc-FunkyTownlongVersion.wav", wavbuf, wavlen, &desired);
 }
 
-void deinit_audio(Uint8 **wavbuf, SDL_AudioDeviceID audio_device)
+void deinit_audio(Uint8 **wavbuf)
 {
     SDL_FreeWAV(*wavbuf);
     SDL_CloseAudioDevice(audio_device);

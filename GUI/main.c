@@ -12,10 +12,6 @@ extern SDL_AudioDeviceID audio_device;
 
 extern float volume_slider_value;
 extern float balance_slider_value;
-
-extern Uint8 *wavbuf;
-extern Uint32 wavlen;
-extern SDL_AudioSpec wavspec;
 extern SDL_AudioStream *stream;
 
 typedef struct progress_shower progress_shower;
@@ -148,10 +144,11 @@ static void activate(GtkApplication *app, gpointer user_data)
 int main(int argc, char **argv)
 {
 	GDir *test_songs = g_dir_open("../Test_Songs", 0, NULL);
-
+	Uint8 *wavbuf = NULL;
+	Uint32 wavlen = 0;
 	GtkApplication *app;
 	int ret;
-	init_everything();
+	init_everything(&wavbuf, &wavlen);
 	gtk_init(&argc, &argv);
 	myCSS();
 
@@ -164,7 +161,7 @@ int main(int argc, char **argv)
 
 	printf("%s\n", g_dir_read_name(test_songs));
 	g_object_unref(app);
-
+	deinit_audio(&wavbuf);
 	// gtk_main();
 	return ret;
 }
