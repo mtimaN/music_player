@@ -2,8 +2,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <SDL2/SDL.h>
 
-#define LENGHT 60000.0
+#include "audio.h"
+
+#define LENGTH 60000.0
+
+extern SDL_AudioDeviceID audio_device;
+
+extern float volume_slider_value;
+extern float balance_slider_value;
+
+extern Uint8 *wavbuf;
+extern Uint32 wavlen;
+extern SDL_AudioSpec wavspec;
+extern SDL_AudioStream *stream;
 
 typedef struct progress_shower progress_shower;
 struct progress_shower {
@@ -27,7 +40,7 @@ static gboolean inc_progress(gpointer data)
 	if (prog >= 1.0)
 		prog = 0.0;
 	else
-		prog += (1000.0/LENGHT);
+		prog += (1000.0/LENGTH);
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), prog);
 	printf("11\n");
@@ -36,7 +49,6 @@ static gboolean inc_progress(gpointer data)
 static void change_main_button_label(GtkWidget *button, gpointer data)
 {
 	progress_shower *p = data;
-
 	const char *curr_label = gtk_button_get_label(GTK_BUTTON(button));
 
 	if (p->pause) {
@@ -45,8 +57,10 @@ static void change_main_button_label(GtkWidget *button, gpointer data)
 		if (p->pause == -1)
 			g_timeout_add(1000, inc_progress, p);
 
+		SDL_PauseAudioDevice(audio_device, SDL_FALSE);
 		p->pause = 0;
 	} else {
+		SDL_PauseAudioDevice(audio_device, SDL_TRUE);
 		gtk_button_set_label(GTK_BUTTON(button), "Play");
 		g_print("Paused\n");
 		p->pause = 1;
@@ -137,6 +151,7 @@ int main(int argc, char **argv)
 
 	GtkApplication *app;
 	int ret;
+	init_everything();
 	gtk_init(&argc, &argv);
 	myCSS();
 
