@@ -194,6 +194,8 @@ void init_everything(Uint8 **audiobuf, Uint32 *audiolen, char *fname)
 
 void deinit_audio(Uint8 **audiobuf, char *format)
 {
+    if (!format)
+        return;
     if (strcmp(format, ".wav") == 0)
         SDL_FreeWAV(*audiobuf);
     else if (strcmp(format, ".flac") == 0 || strcmp(format, ".mp3") == 0) {

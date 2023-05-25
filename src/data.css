@@ -61,9 +61,34 @@
 #playlist:selected{
     background-color: rgb(63, 62, 62);
     border-radius: 10px;
+    border-style: none;
 }
 
 #playlist:hover{
     background-color: rgb(63, 62, 62);
     border-radius: 10px;
+    border-style: none;
+}
+
+#songs_list{
+    background-color: transparent;
+}
+
+#song {
+    background-color: rgb(31, 31, 31);
+    color: rgb(255, 255, 255);
+    border-radius: 10px;
+    border-style: none;
+}
+
+#song:selected{
+    background-color: rgb(63, 62, 62);
+    border-radius: 10px;
+    border-style: none;
+}
+
+#song:hover{
+    background-color: rgb(63, 62, 62);
+    border-radius: 10px;
+    border-style: none;
 }

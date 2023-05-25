@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = `pkg-config --cflags gtk+-3.0` `sdl2-config --cflags`
+CFLAGS = `pkg-config --cflags gtk+-3.0` `sdl2-config --cflags` -g
 LIBS = `pkg-config --libs gtk+-3.0` -lSDL2 -lSDL2_mixer
 
 # Specify the target file to build
