@@ -7,9 +7,6 @@ SDL_AudioDeviceID audio_device = 0;
 float volume_slider_value = 1.0f;
 float balance_slider_value = 0.5f;
 
-/*Uint8 *audiobuf = NULL;
-Uint32 audiolen = 0;*/
-//SDL_AudioSpec wavspec;
 SDL_AudioStream *stream = NULL;
 
 void panic_and_abort(const char *title, const char *text)
@@ -122,14 +119,17 @@ SDL_bool open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiol
 
         tmpstream = SDL_NewAudioStream(wavspec->format, wavspec->channels, wavspec->freq, AUDIO_F32, 2, 48000);
         if (!tmpstream) {
+            printf("Couldn't open WAV file\n");
             goto failed;
         }
 
         if (SDL_AudioStreamPut(tmpstream, *audiobuf, *audiolen) == -1) {
+            printf("Couldn't open WAV file\n");
             goto failed;
         }
 
         if (SDL_AudioStreamFlush(tmpstream) == -1) {
+            printf("Couldn't open WAV file\n");
             goto failed;
         }
     }
@@ -160,7 +160,7 @@ void init_everything(Uint8 **audiobuf, Uint32 *audiolen, char *fname)
     desired.callback = feed_audio_device_callback;
     audio_device = SDL_OpenAudioDevice(NULL, 0, &desired, NULL, 0);
     if (audio_device == 0) {
-        panic_and_abort("Couldn't audio device!", SDL_GetError());
+        panic_and_abort("Couldn't open audio device!", SDL_GetError());
     }
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);  // tell SDL we want this event that is disabled by default.
