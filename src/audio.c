@@ -4,6 +4,7 @@
 #include "audio.h"
 SDL_AudioDeviceID audio_device = 0;
 
+// these variables are used to change the volume and the panning of the music
 float volume_slider_value = 1.0f;
 float balance_slider_value = 0.5f;
 
@@ -97,7 +98,26 @@ SDL_bool open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiol
     } else if (strcmp(ext, ".flac") == 0) {
         Mix_CloseAudio();
         Mix_Quit();
+        SDL_FreeWAV(*audiobuf);
         Mix_Init(MIX_INIT_FLAC);
+        if (Mix_OpenAudio(96000, AUDIO_F32, 2, 4096) != 0) {
+            printf("Mix_OpenAudio failed: %s\n", Mix_GetError());
+            goto failed;
+        }
+        Mix_Music *music = Mix_LoadMUS(fname);
+        if (music != NULL)
+        {
+            Mix_PlayMusic(music, 1);
+            Mix_PauseMusic();
+            return SDL_TRUE;
+        } else {
+            printf("Mix_LoadMUS failed: %s\n", Mix_GetError());
+        }
+    } else if (strcmp(ext, ".mp3") == 0) {
+        Mix_CloseAudio();
+        Mix_Quit();
+        SDL_FreeWAV(*audiobuf);
+        Mix_Init(MIX_INIT_MP3);
         if (Mix_OpenAudio(48000, AUDIO_F32, 2, 4096) != 0) {
             printf("Mix_OpenAudio failed: %s\n", Mix_GetError());
             goto failed;
@@ -113,6 +133,8 @@ SDL_bool open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiol
         }
     } else {
         SDL_FreeWAV(*audiobuf);
+        Mix_CloseAudio();
+        Mix_Quit();
         if (SDL_LoadWAV(fname, wavspec, audiobuf, audiolen) == NULL) {
             goto failed;
         }
@@ -142,6 +164,8 @@ SDL_bool open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiol
     return SDL_TRUE;
 
 failed:
+    Mix_CloseAudio();
+    Mix_Quit();
     stop_audio(audiobuf, audiolen);
     return SDL_FALSE;
 }
@@ -172,7 +196,7 @@ void deinit_audio(Uint8 **audiobuf, char *format)
 {
     if (strcmp(format, ".wav") == 0)
         SDL_FreeWAV(*audiobuf);
-    else if (strcmp(format, ".flac") == 0) {
+    else if (strcmp(format, ".flac") == 0 || strcmp(format, ".mp3") == 0) {
         Mix_CloseAudio();
         Mix_Quit();
     }

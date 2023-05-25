@@ -75,7 +75,7 @@ static void change_main_button_label(GtkWidget *button, gpointer data)
 	} else {
 		SDL_PauseAudioDevice(audio_device, SDL_TRUE);
 		gtk_button_set_label(GTK_BUTTON(button), "Play");
-		Mix_HaltMusic();
+		Mix_PauseMusic();
 		g_print("Paused\n");
 		p->pause = 1;
 	}
@@ -204,10 +204,6 @@ static void activate(GtkApplication *app, gpointer user_data)
 	g_signal_connect(playlists_list, "row-activated", G_CALLBACK(on_row_selection), NULL);
 
 	myWindow(&window);
-	
-	g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), p);
-
-	myWindow(&window);
 }
 
 int main(int argc, char **argv)
@@ -234,7 +230,7 @@ int main(int argc, char **argv)
 	Uint8 *audiobuf = NULL;
 	Uint32 audiolen = 0;
 	GtkApplication *app;
-	char fname[100] = "../Test_Songs/103-radiohead-subterranean_homesick_alien_(remastered)-faf902be.flac";
+	char fname[100] = "../../songs/103-radiohead-subterranean_homesick_alien_(remastered)-faf902be.flac";
 	int ret;
 	init_everything(&audiobuf, &audiolen, fname);
 	gtk_init(&argc, &argv);
