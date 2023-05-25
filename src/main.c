@@ -19,8 +19,10 @@ typedef struct progress_shower progress_shower;
 struct progress_shower {
 	GtkWidget *prog_bar;
 	int pause;
+	int length;
 };
 
+extern SDL_AudioSpec desired;
 GtkWidget *songs_list;
 char path[300];
 
@@ -49,10 +51,10 @@ GtkWidget *new_song(const char *name)
 	return n_song;
 }
 
-void on_song_selection(GtkWidget *s_list, gpointer data)
+void on_song_selection(GtkWidget *s_list, GtkListBoxRow *row, gpointer data)
 {
 	if(path[0] != 0) {
-		GtkListBoxRow *row;
+		
 		GList *list_itr;
 		GtkWidget *label;
 		row = gtk_list_box_get_selected_row(GTK_LIST_BOX(songs_list));
@@ -64,8 +66,9 @@ void on_song_selection(GtkWidget *s_list, gpointer data)
 		strcat(path,gtk_label_get_text(GTK_LABEL(label)));
 
 		printf("%s\n", path);
-
-		init_everything(&audiobuf, &audiolen, path);
+		GtkWidget *prog_bar = ((progress_shower *)data)->prog_bar;
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), 0.0);
+		((progress_shower *)data)->length = open_new_audio_file(path, &audiobuf, &audiolen) * 1000;
 		path[n] = '\0';
 	}
 }
@@ -132,13 +135,15 @@ static gboolean inc_progress(gpointer data)
 		return FALSE;
 	}
 
-	if (prog >= 1.0)
+	if (prog >= 1.0) {
 		prog = 0.0;
-	else
-		prog += (1000.0/LENGTH);
+		p->pause = 1;
+	} else {
+		prog += (1000.0/p->length);
+	}
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), prog);
-	printf("11\n");
+	// printf("11\n");
 }
 
 static void change_main_button_label(GtkWidget *button, gpointer data)
@@ -233,7 +238,7 @@ GtkWidget *new_playlist(const char *name)
 	gtk_widget_set_name(GTK_WIDGET(new_playlist), "playlist");
 
 	return new_playlist;
-}
+}char fname[100] = "/home/razvan/Music/Music/Led Zeppelin - Stairway To Heaven.wav";
 
 void detect_playlists(GList *playlists, GtkWidget *playlists_list)
 { 
@@ -273,6 +278,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 	prog_bar = gtk_progress_bar_new();
 	p->prog_bar = prog_bar;
 	p->pause = -1;
+	p->length = 60000;
 	myProgressBar(&prog_bar, &fixed);
 
 	playlists_list = gtk_list_box_new();
@@ -300,13 +306,14 @@ static void activate(GtkApplication *app, gpointer user_data)
 	char *path = malloc(300);
 	g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), p);
 	g_signal_connect(playlists_list, "row-selected", G_CALLBACK(on_row_selection), path);
-	g_signal_connect(songs_list, "row-selected", G_CALLBACK(on_song_selection), NULL);
+	g_signal_connect(songs_list, "row-selected", G_CALLBACK(on_song_selection), p);
 
 	myWindow(&window);
 }
 
 int main(int argc, char **argv)
 {	
+	init_everything(&audiobuf, &audiolen);
 	char *aux = malloc(100);
 	const char *tmp;
 	strcpy(aux, g_get_home_dir());

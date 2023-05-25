@@ -9,6 +9,7 @@ float volume_slider_value = 1.0f;
 float balance_slider_value = 0.5f;
 
 SDL_AudioStream *stream = NULL;
+SDL_AudioSpec desired;
 
 void panic_and_abort(const char *title, const char *text)
 {
@@ -77,7 +78,7 @@ void stop_audio(Uint8 **audiobuf, Uint32 *audiolen)
     *audiolen = 0;
 }
 
-SDL_bool open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiolen, SDL_AudioSpec *wavspec)
+Uint32 open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiolen)
 {
     SDL_AudioStream *tmpstream = stream;
 
@@ -89,57 +90,55 @@ SDL_bool open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiol
     SDL_FreeAudioStream(tmpstream);
     *audiobuf = NULL;
     *audiolen = 0;
-
+    Mix_Music *music = NULL;
     const char *ext = strrchr(fname, '.');
     if (ext == NULL)
     {
         printf("Invalid audio file: %s\n", fname);
-        return SDL_FALSE;
+        return 0;
     } else if (strcmp(ext, ".flac") == 0) {
         Mix_CloseAudio();
-        Mix_Quit();
         SDL_FreeWAV(*audiobuf);
         Mix_Init(MIX_INIT_FLAC);
         if (Mix_OpenAudio(96000, AUDIO_F32, 2, 4096) != 0) {
             printf("Mix_OpenAudio failed: %s\n", Mix_GetError());
             goto failed;
         }
-        Mix_Music *music = Mix_LoadMUS(fname);
+        music = Mix_LoadMUS(fname);
         if (music != NULL)
         {
             Mix_PlayMusic(music, 1);
             Mix_PauseMusic();
-            return SDL_TRUE;
         } else {
             printf("Mix_LoadMUS failed: %s\n", Mix_GetError());
+            goto failed;
         }
     } else if (strcmp(ext, ".mp3") == 0) {
         Mix_CloseAudio();
-        Mix_Quit();
+
         SDL_FreeWAV(*audiobuf);
         Mix_Init(MIX_INIT_MP3);
         if (Mix_OpenAudio(48000, AUDIO_F32, 2, 4096) != 0) {
             printf("Mix_OpenAudio failed: %s\n", Mix_GetError());
             goto failed;
         }
-        Mix_Music *music = Mix_LoadMUS(fname);
+        music = Mix_LoadMUS(fname);
         if (music != NULL)
         {
             Mix_PlayMusic(music, 1);
             Mix_PauseMusic();
-            return SDL_TRUE;
         } else {
             printf("Mix_LoadMUS failed: %s\n", Mix_GetError());
+            goto failed;
         }
     } else {
         SDL_FreeWAV(*audiobuf);
         Mix_CloseAudio();
-        Mix_Quit();
-        if (SDL_LoadWAV(fname, wavspec, audiobuf, audiolen) == NULL) {
+        if (SDL_LoadWAV(fname, &desired, audiobuf, audiolen) == NULL) {
             goto failed;
         }
 
-        tmpstream = SDL_NewAudioStream(wavspec->format, wavspec->channels, wavspec->freq, AUDIO_F32, 2, 48000);
+        tmpstream = SDL_NewAudioStream(desired.format, desired.channels, desired.freq, AUDIO_F32, 2, 48000);
         if (!tmpstream) {
             printf("Couldn't open WAV file\n");
             goto failed;
@@ -161,18 +160,21 @@ SDL_bool open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiol
     SDL_AtomicSetPtr((void **) &stream, tmpstream);
     SDL_UnlockAudioDevice(audio_device);
 
-    return SDL_TRUE;
+    // if (music)
+    //     return Mix_MusicDuration(music);
+    // else
+        return (Uint32)(*audiolen/(desired.freq * desired.channels * (SDL_AUDIO_BITSIZE(desired.format)) / 8));
 
 failed:
     Mix_CloseAudio();
     Mix_Quit();
     stop_audio(audiobuf, audiolen);
-    return SDL_FALSE;
+    return 0;
 }
 
-void init_everything(Uint8 **audiobuf, Uint32 *audiolen, char *fname)
+void init_everything(Uint8 **audiobuf, Uint32 *audiolen)
 {
-    SDL_AudioSpec desired;
+    
     if (SDL_Init(SDL_INIT_AUDIO) == -1) {
         panic_and_abort("SDL_Init failed", SDL_GetError());
     }
@@ -188,8 +190,6 @@ void init_everything(Uint8 **audiobuf, Uint32 *audiolen, char *fname)
     }
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);  // tell SDL we want this event that is disabled by default.
-
-    open_new_audio_file(fname, audiobuf, audiolen, &desired);
 }
 
 void deinit_audio(Uint8 **audiobuf, char *format)
