@@ -22,7 +22,6 @@ struct progress_shower {
 };
 
 GtkWidget *songs_list;
-char fname[100] = "/home/razvan/Music/Music/Led Zeppelin - Stairway To Heaven.wav";
 char path[300];
 
 Uint8 *audiobuf = NULL;
@@ -330,7 +329,6 @@ int main(int argc, char **argv)
 	GtkApplication *app;
 	
 	int ret;
-	init_everything(&audiobuf, &audiolen, fname);
 	gtk_init(&argc, &argv);
 	myCSS();
 
@@ -340,7 +338,7 @@ int main(int argc, char **argv)
 	ret = g_application_run(G_APPLICATION(app), argc, argv);
 
 	g_object_unref(app);
-	deinit_audio(&audiobuf, strrchr(fname, '.'));
+	deinit_audio(&audiobuf, strrchr(path, '.'));
 	// gtk_main();
 	return ret;
 }
