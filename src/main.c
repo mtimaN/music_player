@@ -230,7 +230,7 @@ int main(int argc, char **argv)
 	Uint8 *audiobuf = NULL;
 	Uint32 audiolen = 0;
 	GtkApplication *app;
-	char fname[100] = "../../songs/103-radiohead-subterranean_homesick_alien_(remastered)-faf902be.flac";
+	char fname[100] = "../../songs/A Cruel Angel's Thesis (Director's Edit Version)-k8ozVkIkr-g.mp3";
 	int ret;
 	init_everything(&audiobuf, &audiolen, fname);
 	gtk_init(&argc, &argv);
