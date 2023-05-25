@@ -21,11 +21,63 @@ struct progress_shower {
 	int pause;
 };
 
+GtkWidget *songs_list;
+char fname[100] = "/home/razvan/Music/Music/Led Zeppelin - Stairway To Heaven.wav";
+char path[300];
+
+Uint8 *audiobuf = NULL;
+Uint32 audiolen = 0;
+
 void myCSS(void);
+GtkWidget *new_playlist(const char *name);
 
-
-void on_row_selection(GtkWidget *playlists_list)
+GtkWidget *new_song(const char *name)
 {
+	GtkWidget *n_song, *label;
+
+	n_song = gtk_list_box_row_new();
+
+	char *aux = malloc(100);
+	aux = strcpy(aux, name);
+	label = gtk_label_new(aux);
+	
+	gtk_container_add(GTK_CONTAINER(n_song), label);
+	
+	gtk_widget_set_size_request(GTK_WIDGET(n_song), 150, 50);
+	
+	gtk_widget_set_name(GTK_WIDGET(n_song), "song");
+
+	return n_song;
+}
+
+void on_song_selection(GtkWidget *s_list, gpointer data)
+{
+	if(path[0] != 0) {
+		GtkListBoxRow *row;
+		GList *list_itr;
+		GtkWidget *label;
+		row = gtk_list_box_get_selected_row(GTK_LIST_BOX(songs_list));
+		list_itr = gtk_container_get_children(GTK_CONTAINER(row));
+
+		label = GTK_WIDGET(list_itr->data);
+		int n = strlen(path);
+		strcat(path,"/");
+		strcat(path,gtk_label_get_text(GTK_LABEL(label)));
+
+		printf("%s\n", path);
+
+		init_everything(&audiobuf, &audiolen, path);
+		path[n] = '\0';
+	}
+}
+
+void on_row_selection(GtkWidget *playlists_list, gpointer data)
+{	
+	const char *home = g_get_home_dir();
+	strcpy(path, home);
+	strcat(path, "/Music/");
+
+	// displayed_songs *dsp = data;
 	GtkListBoxRow *row;
 	GList *list_itr;
 	GtkWidget *label;
@@ -33,8 +85,40 @@ void on_row_selection(GtkWidget *playlists_list)
 	list_itr = gtk_container_get_children(GTK_CONTAINER(row));
 
 	label = GTK_WIDGET(list_itr->data);
+	strcat(path, gtk_label_get_text(GTK_LABEL(label)));
+	printf("%s\n", path);
+	
 
-	printf("%s\n", gtk_label_get_text(GTK_LABEL(label)));
+	GDir *songs_library = g_dir_open(path, 0, NULL);
+	const char *tmp;
+	
+	tmp = g_dir_read_name(songs_library);
+	
+	int i = 0;
+	if (tmp) {
+		
+		while(tmp) {
+			// printf("%s\n", tmp);
+
+			row = gtk_list_box_get_row_at_index(GTK_LIST_BOX(songs_list), i);
+			list_itr = gtk_container_get_children(GTK_CONTAINER(row));
+
+			label = GTK_WIDGET(list_itr->data);
+			gtk_label_set_label(GTK_LABEL(label), tmp);
+
+			tmp = g_dir_read_name(songs_library);
+			
+			i++;
+		}
+	}
+	for (; i < 20; i++) {
+		row = gtk_list_box_get_row_at_index(GTK_LIST_BOX(songs_list), i);
+		list_itr = gtk_container_get_children(GTK_CONTAINER(row));
+
+		label = GTK_WIDGET(list_itr->data);
+		gtk_label_set_label(GTK_LABEL(label), "<Song Slot>");
+	}
+	
 	g_list_free(list_itr);
 }
 
@@ -110,7 +194,7 @@ void myButton(GtkWidget **button)
 void mylayout(GtkWidget **fixed, GtkWidget **top_left_box, GtkWidget **left_box, GtkWidget **main_grid) {
 	*top_left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	*left_box = gtk_scrolled_window_new(NULL, NULL);
-	*main_grid = gtk_grid_new();
+	*main_grid = gtk_scrolled_window_new(NULL, NULL);
 	// main list
 	gtk_widget_set_size_request(GTK_WIDGET(*main_grid), 985, 650);
 	gtk_fixed_put(GTK_FIXED(*fixed), *main_grid, 215, 10);
@@ -132,6 +216,7 @@ void myProgressBar(GtkWidget **prog_bar, GtkWidget **fixed)
 	gtk_widget_set_size_request(GTK_WIDGET(*prog_bar), 600, 4);
 	gtk_widget_set_name(GTK_WIDGET(*prog_bar), "progress_bar");
 }
+
 GtkWidget *new_playlist(const char *name)
 {
 	GtkWidget *new_playlist, *label;
@@ -152,10 +237,10 @@ GtkWidget *new_playlist(const char *name)
 }
 
 void detect_playlists(GList *playlists, GtkWidget *playlists_list)
-{
+{ 
+   	int n = g_list_length(playlists);
+	const char *aux;
 	GtkWidget *playlist;
-	int n = g_list_length(playlists);
-	char *aux;
 
 	for (int i = 0 ; i < n ; i++) {
 		aux = g_list_nth_data(playlists, i);
@@ -199,13 +284,24 @@ static void activate(GtkApplication *app, gpointer user_data)
 	gtk_container_add(GTK_CONTAINER(left_box), playlists_list);
 
 	detect_playlists(user_data, playlists_list);
-
-	g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), p);
-	g_signal_connect(playlists_list, "row-activated", G_CALLBACK(on_row_selection), NULL);
-
-	myWindow(&window);
+	GtkWidget *song;
 	
+	songs_list = gtk_list_box_new();
+	gtk_widget_set_name(GTK_WIDGET(songs_list), "songs_list");
+
+	gtk_list_box_set_selection_mode(GTK_LIST_BOX(songs_list), GTK_SELECTION_SINGLE);
+
+	gtk_container_add(GTK_CONTAINER(main_grid), songs_list);
+	
+	for (int i = 0; i < 20; i++) {
+		song = new_song("<Song Slot>");
+
+		gtk_container_add(GTK_CONTAINER(songs_list), song);
+	}
+	char *path = malloc(300);
 	g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), p);
+	g_signal_connect(playlists_list, "row-selected", G_CALLBACK(on_row_selection), path);
+	g_signal_connect(songs_list, "row-selected", G_CALLBACK(on_song_selection), NULL);
 
 	myWindow(&window);
 }
@@ -231,10 +327,8 @@ int main(int argc, char **argv)
 		tmp = g_dir_read_name(songs_library);
 	}
 
-	Uint8 *audiobuf = NULL;
-	Uint32 audiolen = 0;
 	GtkApplication *app;
-	char fname[100] = "../Test_Songs/103-radiohead-subterranean_homesick_alien_(remastered)-faf902be.flac";
+	
 	int ret;
 	init_everything(&audiobuf, &audiolen, fname);
 	gtk_init(&argc, &argv);

@@ -7,9 +7,6 @@ SDL_AudioDeviceID audio_device = 0;
 float volume_slider_value = 1.0f;
 float balance_slider_value = 0.5f;
 
-/*Uint8 *audiobuf = NULL;
-Uint32 audiolen = 0;*/
-//SDL_AudioSpec wavspec;
 SDL_AudioStream *stream = NULL;
 
 void panic_and_abort(const char *title, const char *text)
