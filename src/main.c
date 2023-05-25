@@ -116,7 +116,7 @@ void on_row_selection(GtkWidget *playlists_list, gpointer data)
 			i++;
 		}
 	}
-	for (; i < 20; i++) {
+	for (; i < 50; i++) {
 		row = gtk_list_box_get_row_at_index(GTK_LIST_BOX(songs_list), i);
 		list_itr = gtk_container_get_children(GTK_CONTAINER(row));
 
@@ -303,7 +303,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 
 	gtk_container_add(GTK_CONTAINER(main_grid), songs_list);
 	
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 50; i++) {
 		song = new_song("<Song Slot>");
 
 		gtk_container_add(GTK_CONTAINER(songs_list), song);
