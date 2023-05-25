@@ -18,6 +18,7 @@ extern SDL_AudioStream *stream;
 typedef struct progress_shower progress_shower;
 struct progress_shower {
 	GtkWidget *prog_bar;
+	GtkWidget *button;
 	int pause;
 	int length;
 };
@@ -69,6 +70,8 @@ void on_song_selection(GtkWidget *s_list, GtkListBoxRow *row, gpointer data)
 		GtkWidget *prog_bar = ((progress_shower *)data)->prog_bar;
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), 0.0);
 		((progress_shower *)data)->length = open_new_audio_file(path, &audiobuf, &audiolen) * 1000;
+		if (((progress_shower *)data)->length == 0)
+			((progress_shower *)data)->length = 1;
 		path[n] = '\0';
 	}
 }
@@ -137,7 +140,8 @@ static gboolean inc_progress(gpointer data)
 
 	if (prog >= 1.0) {
 		prog = 0.0;
-		p->pause = 1;
+		p->pause = -1;
+		gtk_button_set_label(GTK_BUTTON(p->button), "Play");
 	} else {
 		prog += (1000.0/p->length);
 	}
@@ -279,6 +283,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 	p->prog_bar = prog_bar;
 	p->pause = -1;
 	p->length = 60000;
+	p->button = button;
 	myProgressBar(&prog_bar, &fixed);
 
 	playlists_list = gtk_list_box_new();
@@ -304,6 +309,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 		gtk_container_add(GTK_CONTAINER(songs_list), song);
 	}
 	char *path = malloc(300);
+
 	g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), p);
 	g_signal_connect(playlists_list, "row-selected", G_CALLBACK(on_row_selection), path);
 	g_signal_connect(songs_list, "row-selected", G_CALLBACK(on_song_selection), p);
