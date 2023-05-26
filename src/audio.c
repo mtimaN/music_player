@@ -100,7 +100,6 @@ Uint32 open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiolen
     } else if (strcmp(ext, ".flac") == 0) {
         Mix_CloseAudio();
         SDL_FreeWAV(*audiobuf);
-        Mix_Init(MIX_INIT_FLAC);
         if (Mix_OpenAudio(96000, AUDIO_F32, 2, 4096) != 0) {
             printf("Mix_OpenAudio failed: %s\n", Mix_GetError());
             goto failed;
@@ -116,9 +115,7 @@ Uint32 open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiolen
         }
     } else if (strcmp(ext, ".mp3") == 0) {
         Mix_CloseAudio();
-
         SDL_FreeWAV(*audiobuf);
-        Mix_Init(MIX_INIT_MP3);
         if (Mix_OpenAudio(48000, AUDIO_F32, 2, 4096) != 0) {
             printf("Mix_OpenAudio failed: %s\n", Mix_GetError());
             goto failed;
@@ -179,6 +176,7 @@ void init_audio(Uint8 **audiobuf, Uint32 *audiolen)
     if (SDL_Init(SDL_INIT_AUDIO) == -1) {
         panic_and_abort("SDL_Init failed", SDL_GetError());
     }
+    Mix_Init(MIX_INIT_FLAC | MIX_INIT_MP3);
     SDL_zero(desired);
     desired.freq = 48000;
     desired.format = AUDIO_F32;
