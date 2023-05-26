@@ -139,6 +139,9 @@ static gboolean inc_progress(gpointer data)
 	if (prog >= 1.0) {
 		prog = 0.0;
 		p->pause = -1;
+		Mix_PauseMusic();
+		SDL_PauseAudioDevice(audio_device, SDL_TRUE);
+		g_print("Paused\n");
 		gtk_button_set_label(GTK_BUTTON(p->button), "Play");
 	} else {
 		prog += (1000.0/p->length);
