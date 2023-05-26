@@ -55,7 +55,9 @@
     background-color: transparent;
     color: rgb(255, 255, 255);
     border-radius: 10px;
-    border-style: none;    
+    border-style: none;
+    font-size: 15px;
+    font-weight: bold;   
 }
 
 #playlist:selected{
@@ -75,10 +77,12 @@
 }
 
 #song {
-    background-color: rgb(31, 31, 31);
+    background-color: transparent;
     color: rgb(255, 255, 255);
     border-radius: 10px;
     border-style: none;
+    font-size: 15px;
+    font-weight: bold;
 }
 
 #song:selected{
