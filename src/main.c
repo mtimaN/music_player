@@ -237,7 +237,7 @@ GtkWidget *new_playlist(const char *name)
 	
 	gtk_container_add(GTK_CONTAINER(new_playlist), label);
 	
-	gtk_widget_set_size_request(GTK_WIDGET(new_playlist), 150, 50)
+	gtk_widget_set_size_request(GTK_WIDGET(new_playlist), 150, 50);
 	gtk_widget_set_name(GTK_WIDGET(new_playlist), "playlist");
 
 	return new_playlist;
