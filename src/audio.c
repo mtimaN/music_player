@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include "audio.h"
+
 SDL_AudioDeviceID audio_device = 0;
 
 // these variables are used to change the volume and the panning of the music
@@ -32,7 +33,7 @@ void SDLCALL feed_audio_device_callback(void *userdata, Uint8 *output_stream, in
         const int num_samples = (num_converted_bytes / sizeof (float));
         float *samples = (float *) output_stream;
 
-        SDL_assert((num_samples % 2) == 0);  // this should always be stereo data (at least for now).
+        SDL_assert((num_samples % 2) == 0);  // this should always be stereo data
 
         // change the volume of the audio we're playing.
         if (volume_slider_value != 1.0f) {
@@ -160,10 +161,10 @@ Uint32 open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiolen
     SDL_AtomicSetPtr((void **) &stream, tmpstream);
     SDL_UnlockAudioDevice(audio_device);
 
-    // if (music)
-    //     return Mix_MusicDuration(music);
-    // else
-        return (Uint32)(*audiolen/(desired.freq * desired.channels * (SDL_AUDIO_BITSIZE(desired.format)) / 8));
+    // adding some placeholder for length
+    if (*audiolen == 0)
+        *audiolen = 99999999;
+    return (Uint32)(*audiolen/(desired.freq * desired.channels * (SDL_AUDIO_BITSIZE(desired.format)) / 8));
 
 failed:
     Mix_CloseAudio();
@@ -172,7 +173,7 @@ failed:
     return 0;
 }
 
-void init_everything(Uint8 **audiobuf, Uint32 *audiolen)
+void init_audio(Uint8 **audiobuf, Uint32 *audiolen)
 {
     
     if (SDL_Init(SDL_INIT_AUDIO) == -1) {
@@ -192,16 +193,11 @@ void init_everything(Uint8 **audiobuf, Uint32 *audiolen)
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);  // tell SDL we want this event that is disabled by default.
 }
 
-void deinit_audio(Uint8 **audiobuf, char *format)
+void deinit_audio(Uint8 **audiobuf)
 {
-    if (!format)
-        return;
-    if (strcmp(format, ".wav") == 0)
-        SDL_FreeWAV(*audiobuf);
-    else if (strcmp(format, ".flac") == 0 || strcmp(format, ".mp3") == 0) {
-        Mix_CloseAudio();
-        Mix_Quit();
-    }
+    SDL_FreeWAV(*audiobuf);
+    Mix_CloseAudio();
+    Mix_Quit();
     SDL_CloseAudioDevice(audio_device);
     SDL_Quit();
 }

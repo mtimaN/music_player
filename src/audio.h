@@ -9,6 +9,6 @@ void stop_audio(Uint8 **audiobuf, Uint32 *audiolen);
 
 Uint32 open_new_audio_file(const char *fname, Uint8 **audiobuf, Uint32 *audiolen);
 
-void init_everything(Uint8 **audiobuf, Uint32 *audiolen);
+void init_audio(Uint8 **audiobuf, Uint32 *audiolen);
 
-void deinit_audio(Uint8 **audiobuf, char *format);
+void deinit_audio(Uint8 **audiobuf);

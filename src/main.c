@@ -82,7 +82,6 @@ void on_row_selection(GtkWidget *playlists_list, gpointer data)
 	strcpy(path, home);
 	strcat(path, "/Music/");
 
-	// displayed_songs *dsp = data;
 	GtkListBoxRow *row;
 	GList *list_itr;
 	GtkWidget *label;
@@ -103,7 +102,6 @@ void on_row_selection(GtkWidget *playlists_list, gpointer data)
 	if (tmp) {
 		
 		while(tmp) {
-			// printf("%s\n", tmp);
 
 			row = gtk_list_box_get_row_at_index(GTK_LIST_BOX(songs_list), i);
 			list_itr = gtk_container_get_children(GTK_CONTAINER(row));
@@ -147,7 +145,6 @@ static gboolean inc_progress(gpointer data)
 	}
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), prog);
-	// printf("11\n");
 }
 
 static void change_main_button_label(GtkWidget *button, gpointer data)
@@ -237,12 +234,11 @@ GtkWidget *new_playlist(const char *name)
 	
 	gtk_container_add(GTK_CONTAINER(new_playlist), label);
 	
-	gtk_widget_set_size_request(GTK_WIDGET(new_playlist), 150, 50);
-	// g_print("%d\n",gtk_list_box_row_get_activatable(GTK_LIST_BOX_ROW(new_playlist)));
+	gtk_widget_set_size_request(GTK_WIDGET(new_playlist), 150, 50)
 	gtk_widget_set_name(GTK_WIDGET(new_playlist), "playlist");
 
 	return new_playlist;
-}char fname[100] = "/home/razvan/Music/Music/Led Zeppelin - Stairway To Heaven.wav";
+}
 
 void detect_playlists(GList *playlists, GtkWidget *playlists_list)
 { 
@@ -319,7 +315,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 
 int main(int argc, char **argv)
 {	
-	init_everything(&audiobuf, &audiolen);
+	init_audio(&audiobuf, &audiolen);
 	char *aux = malloc(100);
 	const char *tmp;
 	strcpy(aux, g_get_home_dir());
@@ -351,8 +347,7 @@ int main(int argc, char **argv)
 	ret = g_application_run(G_APPLICATION(app), argc, argv);
 
 	g_object_unref(app);
-	deinit_audio(&audiobuf, strrchr(path, '.'));
-	// gtk_main();
+	deinit_audio(&audiobuf);
 	return ret;
 }
 
