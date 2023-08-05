@@ -183,7 +183,7 @@ void myWindow(GtkWidget **window)
 
 	gtk_widget_show_all(*window);
 
-	gtk_window_set_title(GTK_WINDOW(*window), "Spotify");
+	gtk_window_set_title(GTK_WINDOW(*window), "Smoothify");
 
 	gtk_window_set_resizable(GTK_WINDOW(*window), FALSE);
 }
