@@ -6,7 +6,7 @@
 SDL_AudioDeviceID audio_device = 0;
 
 // these variables are used to change the volume and the panning of the music
-float volume_slider_value = 1.0f;
+float volume_slider_value = 0.5f;
 float balance_slider_value = 0.5f;
 
 SDL_AudioStream *stream = NULL;

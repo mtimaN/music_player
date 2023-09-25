@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = `pkg-config --cflags gtk+-3.0`
 LIBS = `pkg-config --libs gtk+-3.0`
 
-build: startGtkApp
+build: start
 
 start: start.c
 	gcc `pkg-config --cflags gtk+-3.0` -o start start.c `pkg-config --libs gtk+-3.0`

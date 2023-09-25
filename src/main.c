@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 
 #include "audio.h"
+#include "song_list.h"
 
 #define LENGTH 60000.0
 
@@ -24,8 +25,10 @@ struct progress_shower {
 };
 
 extern SDL_AudioSpec desired;
+
 GtkWidget *songs_list;
 char path[300];
+int songs_count = 0;
 
 Uint8 *audiobuf = NULL;
 Uint32 audiolen = 0;
@@ -33,96 +36,37 @@ Uint32 audiolen = 0;
 void myCSS(void);
 GtkWidget *new_playlist(const char *name);
 
-GtkWidget *new_song(const char *name)
+void volume_change(GtkRange *volume_scale, gpointer user_data)
 {
-	GtkWidget *n_song, *label;
-
-	n_song = gtk_list_box_row_new();
-
-	char *aux = malloc(100);
-	aux = strcpy(aux, name);
-	label = gtk_label_new(aux);
-	
-	gtk_container_add(GTK_CONTAINER(n_song), label);
-	
-	gtk_widget_set_size_request(GTK_WIDGET(n_song), 150, 50);
-	
-	gtk_widget_set_name(GTK_WIDGET(n_song), "song");
-
-	return n_song;
+	double tmp = gtk_range_get_value(volume_scale);
+	tmp = tmp/100;
+	volume_slider_value = (float)tmp;
 }
 
 void on_song_selection(GtkWidget *s_list, GtkListBoxRow *row, gpointer data)
 {
 	if(path[0] != 0) {
-		
 		GList *list_itr;
 		GtkWidget *label;
-		row = gtk_list_box_get_selected_row(GTK_LIST_BOX(songs_list));
-		list_itr = gtk_container_get_children(GTK_CONTAINER(row));
-
-		label = GTK_WIDGET(list_itr->data);
-		int n = strlen(path);
-		strcat(path,"/");
-		strcat(path,gtk_label_get_text(GTK_LABEL(label)));
-
-		printf("%s\n", path);
-		GtkWidget *prog_bar = ((progress_shower *)data)->prog_bar;
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), 0.0);
-		((progress_shower *)data)->length = open_new_audio_file(path, &audiobuf, &audiolen) * 1000;
-		if (((progress_shower *)data)->length == 0)
-			((progress_shower *)data)->length = 1;
-		path[n] = '\0';
-	}
-}
-
-void on_row_selection(GtkWidget *playlists_list, gpointer data)
-{	
-	const char *home = g_get_home_dir();
-	strcpy(path, home);
-	strcat(path, "/Music/");
-
-	GtkListBoxRow *row;
-	GList *list_itr;
-	GtkWidget *label;
-	row = gtk_list_box_get_selected_row(GTK_LIST_BOX(playlists_list));
-	list_itr = gtk_container_get_children(GTK_CONTAINER(row));
-
-	label = GTK_WIDGET(list_itr->data);
-	strcat(path, gtk_label_get_text(GTK_LABEL(label)));
-	printf("%s\n", path);
-	
-
-	GDir *songs_library = g_dir_open(path, 0, NULL);
-	const char *tmp;
-	
-	tmp = g_dir_read_name(songs_library);
-	
-	int i = 0;
-	if (tmp) {
 		
-		while(tmp) {
-
-			row = gtk_list_box_get_row_at_index(GTK_LIST_BOX(songs_list), i);
+		row = gtk_list_box_get_selected_row(GTK_LIST_BOX(songs_list));
+		if (row) {
 			list_itr = gtk_container_get_children(GTK_CONTAINER(row));
-
-			label = GTK_WIDGET(list_itr->data);
-			gtk_label_set_label(GTK_LABEL(label), tmp);
-
-			tmp = g_dir_read_name(songs_library);
 			
-			i++;
+			label = GTK_WIDGET(list_itr->data);
+			int n = strlen(path);
+			strcat(path,"/");
+			strcat(path,gtk_label_get_text(GTK_LABEL(label)));
+
+			printf("%s\n", path);
+			GtkWidget *prog_bar = ((progress_shower *)data)->prog_bar;
+			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prog_bar), 0.0);
+			((progress_shower *)data)->length = open_new_audio_file(path, &audiobuf, &audiolen) * 1000;
+			if (((progress_shower *)data)->length == 0)
+				((progress_shower *)data)->length = 1;
+			path[n] = '\0';
 		}
 	}
-	for (; i < 50; i++) {
-		row = gtk_list_box_get_row_at_index(GTK_LIST_BOX(songs_list), i);
-		list_itr = gtk_container_get_children(GTK_CONTAINER(row));
-
-		label = GTK_WIDGET(list_itr->data);
-		gtk_label_set_label(GTK_LABEL(label), "<Song Slot>");
-	}
-	
-	g_list_free(list_itr);
 }
 
 static gboolean inc_progress(gpointer data)
@@ -230,7 +174,7 @@ GtkWidget *new_playlist(const char *name)
 	GtkWidget *new_playlist, *label;
 
 	new_playlist = gtk_list_box_row_new();
-
+	gtk_widget_set_can_focus(new_playlist, FALSE);
 	char *aux = malloc(50);
 	aux = strcpy(aux, name);
 	label = gtk_label_new(aux);
@@ -261,7 +205,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 {
 	// gtk code
 	GtkWidget *window, *button, *fixed, *top_left_box, *left_box, *main_grid;
-	GtkWidget *prog_bar, *playlists_list, *playlist;
+	GtkWidget *prog_bar, *playlists_list, *playlist, *volume_scale;
 	const char *curr_label;
 
 	progress_shower *p = malloc(sizeof(progress_shower));
@@ -272,6 +216,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 
 	myButton(&button);
 
+	gtk_widget_set_can_focus(button, FALSE);
 	gtk_fixed_put(GTK_FIXED(fixed), button, 570, 700);
 
 	gtk_container_add(GTK_CONTAINER(window), fixed);
@@ -293,25 +238,21 @@ static void activate(GtkApplication *app, gpointer user_data)
 	gtk_container_add(GTK_CONTAINER(left_box), playlists_list);
 
 	detect_playlists(user_data, playlists_list);
-	GtkWidget *song;
-	
-	songs_list = gtk_list_box_new();
-	gtk_widget_set_name(GTK_WIDGET(songs_list), "songs_list");
 
-	gtk_list_box_set_selection_mode(GTK_LIST_BOX(songs_list), GTK_SELECTION_SINGLE);
+	songs_list_init(main_grid);
 
-	gtk_container_add(GTK_CONTAINER(main_grid), songs_list);
-	
-	for (int i = 0; i < 50; i++) {
-		song = new_song("<Song Slot>");
-
-		gtk_container_add(GTK_CONTAINER(songs_list), song);
-	}
 	char *path = malloc(300);
 
+	volume_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+	gtk_widget_set_size_request(volume_scale, 100, 4);
+	gtk_widget_set_name(volume_scale, "volume_scale");
+	gtk_fixed_put(GTK_FIXED(fixed), volume_scale, 1050, 730);
+
 	g_signal_connect(button, "clicked", G_CALLBACK(change_main_button_label), p);
-	g_signal_connect(playlists_list, "row-selected", G_CALLBACK(on_row_selection), path);
+	g_signal_connect(playlists_list, "row-selected", G_CALLBACK(on_playlist_selection), path);
 	g_signal_connect(songs_list, "row-selected", G_CALLBACK(on_song_selection), p);
+	g_signal_connect(volume_scale, "value-changed", G_CALLBACK(volume_change), NULL);
+
 
 	myWindow(&window);
 }
@@ -319,6 +260,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 int main(int argc, char **argv)
 {	
 	init_audio(&audiobuf, &audiolen);
+	
 	char *aux = malloc(100);
 	const char *tmp;
 	strcpy(aux, g_get_home_dir());

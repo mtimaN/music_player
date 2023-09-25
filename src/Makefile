@@ -7,7 +7,7 @@ LIBS = `pkg-config --libs gtk+-3.0` -lSDL2 -lSDL2_mixer
 TARGET = audioplayer
 
 # List of object files needed for the target
-OBJS = main.o audio.o
+OBJS = main.o audio.o song_list.o
 
 # Rule to build the target
 $(TARGET): $(OBJS)
